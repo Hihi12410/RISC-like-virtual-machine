@@ -21,9 +21,8 @@
 #define DECLARE_MODULE_EXPORT(name, type, funcname, ...) EXT EXPORT type CALL _mod_##name##_##funcname(__VA_ARGS__)
 #define DECLARE_MODULE(name, ...) DECLARE_MODULE_IMPORT(name, void, init, __VA_ARGS__)
 
-#define IMPLEMENT_MODULE_IMPORT(name, type, funcname, ...) IMPORT type CALL _mod_##name##_##funcname(__VA_ARGS__)
 #define IMPLEMENT_MODULE_EXPORT(name, type, funcname, ...) EXPORT type CALL _mod_##name##_##funcname(__VA_ARGS__)
-#define IMPLEMENT_MODULE(name, ...) IMPLEMENT_MODULE_IMPORT(name, void, init, __VA_ARGS__)
+#define IMPLEMENT_MODULE(name, ...) IMPLEMENT_MODULE_EXPORT(name, void, init, __VA_ARGS__)
 
 
 #define INIT_MODULE(name, ...) _mod_##name##_init(__VA_ARGS__)

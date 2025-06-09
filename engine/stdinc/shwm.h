@@ -4,6 +4,7 @@
 #define SHWM_INC 1
 #include "stdmain.h"
 #include "stddllhelper.h"
+#include "stdoutput.h"
 
 //Interrupt convention
 typedef struct 
@@ -14,42 +15,47 @@ typedef struct
 }
 INTERRUPT; // --> 192 bits
 
-//SHWM declaratiom
-#define DECLARE_SHWM(name)                                                  \
-    DECLARE_MODULE_IMPORT(name, void, int_hand, INTERRUPT inter);           \
-    DECLARE_MODULE_IMPORT(name, void, p_flags, uint64_t flag);              \
-    DECLARE_MODULE_EXPORT(name, INTERRUPT, r_int);                          \
-    DECLARE_MODULE_EXPORT(name, uint64_t, r_flags);                      
-
-//SHWM implementation
-#define IMPLEMENT_SHWM_INT_HANDLER IMPLEMENT_MODULE_IMPORT(name, void, int_hand, INTERRUPT inter)
-#define IMPLEMENT_SHWM_P_FLAGS IMPLEMENT_MODULE_IMPORT(name, void, p_flags, uint64_t flag)
-
-//Pre-defined interrupt codes
-#define INT_STOP            (uint64_t)0x0
-#define INT_CLOCK           (uint64_t)0x1
-#define INT_ERROR           (uint64_t)0x2
-#define INT_DATA_PASS_FLAGS (uint64_t)0x3
-#define INT_UNDEFINED       (uint64_t)0x4
-#define INT_SUSPEND         (uint64_t)0x5
-#define INT_SUSPEND_WAKE    (uint64_t)0x6
-
 //Hardware module
 //Defines every running module
 typedef struct
 {
+    //Name of the module
+    char name[256];
     //GUID of module
     uint64_t GUID;
     //Is module running?
     bool running;
-    //Flags to pass
-    uint64_t * p_flags;
-    //Flags to read
-    uint64_t * r_flags;
-    //Raise interrupt inside module
-    void * raise_int;
-    //Recieve interrupt from module
-    void * recv_int;
+    //Flag
+    uint64_t flag;
 } SHWM;
+
+
+//SHWM declaration
+#define DECLARE_SHWM(name)                                                      \
+    DECLARE_MODULE_EXPORT(name, void, h_int, INTERRUPT inter);                  \
+    DECLARE_MODULE_IMPORT(shwm, void, w_flag, uint64_t w_flag);                 \
+    DECLARE_MODULE_IMPORT(shwm, uint64_t, r_flag, uint64_t guid);               \
+    DECLARE_MODULE_IMPORT(shwm, void, r_int, INTERRUPT inter);                  \
+    DECLARE_MODULE_IMPORT(shwm, SHWM *, register_mod);                          \
+    DECLARE_MODULE_IMPORT(shwm, void, unregister_mod, SHWM * self);             \
+    DECLARE_MODULE_IMPORT(shwm, void, querry_guid, char * name);                \
+
+#define IMPLEMENT_SHWM(name) IMPLEMENT_MODULE_EXPORT(name, void, h_int, INTERRUPT inter)
+
+DECLARE_MODULE_EXPORT(shwm, void, w_flag, uint64_t w_flag);
+DECLARE_MODULE_EXPORT(shwm, uint64_t, r_flag, uint64_t guid);
+DECLARE_MODULE_EXPORT(shwm, void, r_int, INTERRUPT inter);
+DECLARE_MODULE_EXPORT(shwm, SHWM *, register_mod);
+DECLARE_MODULE_EXPORT(shwm, void, unregister_mod, SHWM * self);
+DECLARE_MODULE_EXPORT(shwm, void, querry_guid, char * name);
+
+
+//Pre-defined interrupt codes
+#define INT_STOP            (uint64_t)0x0
+#define INT_ERROR           (uint64_t)0x1
+#define INT_DATA_PASS_FLAG  (uint64_t)0x2
+#define INT_UNDEFINED       (uint64_t)0x3
+#define INT_SUSPEND         (uint64_t)0x4
+#define INT_SUSPEND_WAKE    (uint64_t)0x5
 
 #endif
